@@ -1,0 +1,26 @@
+
+create table #orders
+(
+order_id int,
+item varchar(20)
+)
+insert into #orders
+values
+(1,'Pizza'),
+(2,'Chow Mein'),
+(3,'Butter Chicken'),
+(4,'Pad Thai'),
+(5,'Burger'),
+(6,'Eggrolls'),
+(7,'Tandoori Chicken')
+
+
+select ord_id,item from 
+(
+select *, case when order_id%2=0 then order_id-1 
+			   when order_id= (select max(order_id) from #orders) and order_id%2!=0 then order_id
+			   when order_id%2!=0 then order_id+1
+			   end ord_id
+from #orders
+)a
+order by ord_id
