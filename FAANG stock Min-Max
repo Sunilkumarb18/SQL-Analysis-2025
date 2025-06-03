@@ -1,0 +1,37 @@
+create table #stock_prices
+(
+Trade_date varchar(20),
+Ticker varchar(20),
+open_val decimal(18,2),
+High_val decimal(18,2),
+Low_val decimal(18,2),
+close_val decimal(18,2)
+)
+
+insert into #stock_prices values
+('31-08-2023','AAPL',187.48,187.84,189.12,187.87),
+('31-07-2023','AAPL',195.26,196.06,196.49,196.45),
+('30-06-2023','AAPL',191.26,191.63,194.48,193.97),
+('31-05-2023','AAPL',176.76,177.33,179.35,177.25),
+('30-04-2023','AAPL',167.88,168.49,169.85,169.68),
+('31-03-2023','AAPL',161.91,162.44,165,164.9),
+('31-08-2023','GOOG',130.85,132.92,127.78,130.17),
+('31-07-2023','GOOG',120.32,134.07,115.83,133.11),
+('30-06-2023','GOOG',123.5,129.55,116.91,120.97),
+('31-05-2023','GOOG',107.72,127.05,104.5,123.37),
+('30-04-2023','GOOG',102.67,109.63,102.38,108.22),
+('31-03-2023','GOOG',90.16,107.51,89.77,104)
+
+select * from #stock_prices
+;with cte1 as(
+select *,dense_rank()over(partition by ticker order by open_val desc) highest_open,
+dense_rank()over(partition by ticker order by open_val ) lowest_open
+from #stock_prices
+)
+select distinct Ticker,
+       (select right(Trade_date,7) from cte1 c2 where c1.Ticker=c2.Ticker and c2.highest_open=1) [Highest Month],
+	   (select open_val from cte1 c2 where c1.Ticker=c2.Ticker and c2.highest_open=1) [Highest Open],
+	   (select right(Trade_date,7) from cte1 c2 where c1.Ticker=c2.Ticker and c2.lowest_open=1) [Lowest Month],
+	   (select open_val from cte1 c2 where c1.Ticker=c2.Ticker and c2.lowest_open=1)[Lowest Open]
+
+from cte1 c1
