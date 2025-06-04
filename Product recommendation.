@@ -1,0 +1,19 @@
+Product recommendation. Just the basic type (“customers who bought this also bought…”). That, in its simplest form, is an outcome of basket analysis. 
+ how to find products which are most frequently bought together using simple SQL. 
+Based on the history ecommerce website can recommend products to new user.
+
+
+with cte1 as
+(
+select o.customer_id,o.order_id,o.product_id,p.name from #orders o
+join #products p on o.product_id=p.id
+)
+select top 1 o2_pr+' '+o1_pr o_pr,count(1) cnr from
+(
+select o1.customer_id,o2.name o2_pr, o1.name o1_pr
+from cte1 o1
+join cte1 o2 on o1.order_id=o2.order_id
+where o1.product_id>o2.product_id
+)a
+group by o2_pr+' '+o1_pr
+order by cnr desc
