@@ -1,0 +1,48 @@
+create table #tickets
+(
+ticket_id varchar(10),
+create_date date,
+resolved_date date
+);
+insert into #tickets values
+(1,'2022-08-01','2022-08-03')
+,(2,'2022-08-01','2022-08-12')
+,(3,'2022-08-01','2022-08-16');
+
+
+
+create table #holidays
+(
+holiday_date date
+,reason varchar(100)
+);
+insert into #holidays values
+('2022-08-11','Rakhi'),('2022-08-15','Independence day');
+
+
+Query:
+-------
+
+;with no_of_days_ex as
+(
+select *,
+       DATEDIFF(DAY,create_date,resolved_date) No_of_days
+from #tickets t
+left join
+ #holidays h on h.holiday_date  between create_date and resolved_date
+)
+,days_ as
+(
+select *,
+       DATEDIFF(DAY,create_date,resolved_date) No_of_days
+from #tickets t
+)
+select a.*,No_of_days-tot exclude_holidays
+from days_ a
+join
+(
+select ticket_id,isnull(count(holiday_date) ,0) tot
+from 
+no_of_days_ex
+group by ticket_id
+)b on a.ticket_id=b.ticket_id
