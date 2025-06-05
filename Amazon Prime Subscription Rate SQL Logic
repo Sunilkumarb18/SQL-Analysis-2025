@@ -1,0 +1,53 @@
+create table #users
+(
+user_id integer,
+name varchar(20),
+join_date date
+);
+insert into #users
+values (1, 'Jon', CAST('2-14-20' AS date)), 
+(2, 'Jane', CAST('2-14-20' AS date)), 
+(3, 'Jill', CAST('2-15-20' AS date)), 
+(4, 'Josh', CAST('2-15-20' AS date)), 
+(5, 'Jean', CAST('2-16-20' AS date)), 
+(6, 'Justin', CAST('2-17-20' AS date)),
+(7, 'Jeremy', CAST('2-18-20' AS date));
+
+create table #events
+(
+user_id integer,
+type varchar(10),
+access_date date
+);
+
+insert into #events values
+(1, 'Pay', CAST('3-1-20' AS date)), 
+(2, 'Music', CAST('3-2-20' AS date)), 
+(2, 'P', CAST('3-12-20' AS date)),
+(3, 'Music', CAST('3-15-20' AS date)), 
+(4, 'Music', CAST('3-15-20' AS date)), 
+(1, 'P', CAST('3-16-20' AS date)), 
+(3, 'P', CAST('3-22-20' AS date));
+
+
+;with cte1 as
+(
+select u.*,e.type,e.access_date, DATEADD(day,30,access_date) Plus_30
+from #users u
+join
+ #events e on u.user_id=e.user_id
+)
+,cte2 as
+(
+select *,case when type in ('Music','P') then 1 else 0 end final_chk
+from cte1
+where access_date<=Plus_30
+)
+select cast(count(1)/cast((select count(1) from #users) as decimal(18,2)) as decimal(18,2))
+from
+(
+select user_id ratio
+from cte2
+group by user_id
+having sum(final_chk)>=2
+)a
