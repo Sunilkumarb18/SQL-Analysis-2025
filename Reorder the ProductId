@@ -1,0 +1,33 @@
+CREATE TABLE #Products (
+    ProductID INT PRIMARY KEY,
+    Product VARCHAR(255),
+    Category VARCHAR(100)
+);
+
+INSERT INTO #Products (ProductID, Product, Category)
+VALUES
+    (1, 'Laptop', 'Electronics'),
+    (2, 'Smartphone', 'Electronics'),
+    (3, 'Tablet', 'Electronics'),
+    (4, 'Headphones', 'Accessories'),
+    (5, 'Smartwatch', 'Accessories'),
+    (6, 'Keyboard', 'Accessories'),
+    (7, 'Mouse', 'Accessories'),
+    (8, 'Monitor', 'Accessories'),
+    (9, 'Printer', 'Electronics');
+
+
+Query:
+--------
+;with cte1 as
+(
+select Category,ProductID, 
+row_number()over(partition by category order by productid desc) rn
+from #Products
+)
+select a.ProductID,b.Product,a.Category from cte1 a
+join
+(
+select *,ROW_NUMBER()over(partition by category order by productid) rn1
+from #Products
+)b on a.rn=b.rn1 and a.Category=b.Category
